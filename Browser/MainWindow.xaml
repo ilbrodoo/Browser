@@ -30,13 +30,33 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
+
+
             <TabControl x:Name="tabControl" Grid.Column="0">
-                <!-- Tab Item for displaying web page -->
-                
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="TabItem">
+                        <Setter Property="HeaderTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <DockPanel LastChildFill="True">
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="5,0"/>
+                                        <Grid HorizontalAlignment="Right">
+                                            <Button Content="X" Width="20" Height="20" Click="CloseTabButton_Click" />
+                                        </Grid>
+                                    </DockPanel>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.ItemContainerStyle>
                 <TabItem Header="New Tab">
-                    <WebBrowser x:Name="webBrowser" />
+                    <WebBrowser x:Name="webBrowser" Margin="0,0,-31,0" />
                 </TabItem>
             </TabControl>
+
+
+
+
 
             <Button Content="+" Height="18" Click="AddTabButton_Click" VerticalAlignment="Top" Grid.Column="1" Margin="5,5,5,0" />
         </Grid>

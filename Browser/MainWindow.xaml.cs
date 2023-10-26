@@ -77,8 +77,17 @@
         private void CloseTabButton_Click(object sender, RoutedEventArgs e)
         {
             Button closeButton = (Button)sender;
-            TabItem tabItem = (TabItem)tabControl.ItemContainerGenerator.ItemFromContainer(closeButton.Parent);
-            tabControl.Items.Remove(tabItem);
+            string tabName = closeButton.Tag as string;
+
+            if (!string.IsNullOrEmpty(tabName))
+            {
+                TabItem tabItem = (TabItem)this.FindName(tabName);
+
+                if (tabItem != null)
+                {
+                    tabControl.Items.Remove(tabItem);
+                }
+            }
         }
 
         private void AddTabButton_Click(object sender, RoutedEventArgs e)
