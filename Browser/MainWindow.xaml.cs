@@ -2,7 +2,8 @@
         using System.Threading.Tasks;
         using System.Windows;
         using System.Windows.Controls;
-        using System.Windows.Navigation;
+using System.Windows.Media;
+using System.Windows.Navigation;
 
         namespace Browser
         {
@@ -76,18 +77,29 @@
                 }
         private void CloseTabButton_Click(object sender, RoutedEventArgs e)
         {
+            // Ottieni il pulsante "X" che è stato premuto
             Button closeButton = (Button)sender;
-            string tabName = closeButton.Tag as string;
 
-            if (!string.IsNullOrEmpty(tabName))
+            // Ottieni il TabItem padre del pulsante
+            TabItem tabItem = FindParentTabItem(closeButton);
+
+            if (tabItem != null)
             {
-                TabItem tabItem = (TabItem)this.FindName(tabName);
-
-                if (tabItem != null)
-                {
-                    tabControl.Items.Remove(tabItem);
-                }
+                // Rimuovi la scheda dal TabControl
+                tabControl.Items.Remove(tabItem);
             }
+        }
+
+        private TabItem FindParentTabItem(DependencyObject child)
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(child);
+
+            while (parent != null && !(parent is TabItem))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            return parent as TabItem;
         }
 
         private void AddTabButton_Click(object sender, RoutedEventArgs e)
