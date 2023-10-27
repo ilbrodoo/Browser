@@ -12,25 +12,57 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="9.716" />
+            <RowDefinition Height="15.284"/>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <!-- Menu -->
-        <Menu Height="25" VerticalAlignment="Top" HorizontalAlignment="Center" Width="800" Background="{DynamicResource wSecondaryBack}" Grid.Row="0" />
+        <DockPanel Height="32" VerticalAlignment="Top" Background="{DynamicResource wSecondaryBack}" Grid.Row="0" Grid.RowSpan="3">
+            <Menu HorizontalAlignment="Stretch">
+                <!-- Inserisci qui gli elementi del menu -->
+            </Menu>
+        </DockPanel>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Width="790">
-            <Button Content="◄" Width="30" Height="25" Click="StopButton_Click" VerticalAlignment="Center"/>
-            <TextBox x:Name="urlTextBox" Style="{StaticResource AddressBarStyle}" Width="711" />
-            <Button Content="Go" Width="27" Height="25" Click="NavigateButton_Click"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.RowSpan="2" Margin="5,0,5,0">
+            <Button Name="refreshButton" Width="30" Height="25" Click="RefreshButton_Click">
+                <Button.Content>
+                    <Viewbox Width="20" Height="20">
+                        <Path Data="M10.063 0C4.516 0 0 4.516 0 10.063c0 4.247 2.744 7.85 6.563 9.143a.938.938 0 001.328-.82.936.936 0 00-.82-1.327A7.158 7.158 0 012 10.063C2 5.025 6.025 1 10.063 1c4.055 0 7.285 3.979 7.93 8.953a.937.937 0 001.04.8.935.935 0 00.8-1.04 9.898 9.898 0 00-9.77-8.71" Fill="#000000"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+            <Button Name="stopButton" Width="30" Height="25" Click="StopButton_Click">
+                <Button.Content>
+                    <Viewbox Width="20" Height="20">
+                        <Path Data="M5 1v2H1v18h18V3h-4V1h-2v2H7V1H5z" Fill="#000000"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+            <Button Name="backButton" Width="30" Height="25" Click="BackButton_Click">
+                <Button.Content>
+                    <Viewbox Width="20" Height="20">
+                        <Path Data="M6 2l-4 4 4 4" Fill="#000000"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+            <Button Name="forwardButton" Width="30" Height="25" Click="ForwardButton_Click">
+                <Button.Content>
+                    <Viewbox Width="20" Height="20">
+                        <Path Data="M2 2l4 4-4 4" Fill="#000000"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+
+            <TextBox x:Name="urlTextBox" Style="{StaticResource AddressBarStyle}" Width="675" />
+            <Button Content="Go" Style="{StaticResource RoundedButtonStyle}" Width="27" Height="25" Click="NavigateButton_Click"/>
         </StackPanel>
 
-        <Grid Grid.Row="1">
+
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
-
 
             <TabControl x:Name="tabControl" Grid.Column="0">
                 <TabControl.ItemContainerStyle>
@@ -50,15 +82,11 @@
                     </Style>
                 </TabControl.ItemContainerStyle>
                 <TabItem Header="New Tab">
-                    <WebBrowser x:Name="webBrowser" Margin="0,0,-31,0" />
+                    <WebBrowser x:Name="webBrowser" Margin="0,0,-1,0" />
                 </TabItem>
             </TabControl>
 
-
-
-
-
-            <Button Content="+" Height="18" Click="AddTabButton_Click" VerticalAlignment="Top" Grid.Column="1" Margin="5,5,5,0" />
+            <Button Content="+" Style="{StaticResource RoundedButtonStyle}" Height="18" Click="AddTabButton_Click" VerticalAlignment="Top" Grid.Column="1" Margin="0,5,5,0" HorizontalAlignment="Right" Width="30" />
         </Grid>
     </Grid>
 </Window>

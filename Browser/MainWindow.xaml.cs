@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,53 +10,93 @@ namespace Browser
 {
     public partial class MainWindow : Window
     {
+        private bool isRefreshing = false;
+        private Uri currentUrl;
+        private WebBrowser currentWebBrowser;
+        private Uri previousUrl;
+        private Uri googleSearchUrl = new Uri("https://www.google.com");
+
         public MainWindow()
         {
+            currentUrl = new Uri("https://www.google.com/");
             InitializeComponent();
 
             TabItem initialTab = (TabItem)tabControl.Items[0];
-            WebBrowser webBrowser = (WebBrowser)initialTab.Content;
+            currentWebBrowser = (WebBrowser)initialTab.Content;
 
-            if (webBrowser != null)
+            if (currentWebBrowser != null)
             {
-                webBrowser.Navigate("https://www.google.com/");
+                currentWebBrowser.Navigate(currentUrl);
             }
         }
-
         private async void NavigateButton_Click(object sender, RoutedEventArgs e)
         {
             string input = urlTextBox.Text;
             if (!string.IsNullOrEmpty(input))
             {
+                // Rimuovi spazi vuoti iniziali e finali dall'input
+                input = input.Trim();
+
+                // Verifica se l'input è una URL assoluta valida
                 Uri url;
-                // Prova a creare un Uri dall'input
                 if (Uri.TryCreate(input, UriKind.Absolute, out url))
                 {
-                    // Se l'operazione è riuscita, naviga all'URL
-                    await LoadWebPageAsync(url.ToString());
+                    previousUrl = currentUrl; // Salva l'URL corrente come URL precedente
+                    currentUrl = url; // Aggiorna l'URL corrente
+                    await LoadWebPageAsync(currentWebBrowser, url);
                 }
                 else
                 {
-                    // Se l'operazione è fallita, esegui una ricerca su Google
-                    url = new Uri("https://www.google.com/search?q=" + Uri.EscapeDataString(input));
-                    await LoadWebPageAsync(url.ToString());
+                    // Controlla se l'input contiene spazi e non contiene "." o "www"
+                    if (input.Contains(" ") || (!input.Contains(".") && !input.Contains("www")))
+                    {
+                        // E' una ricerca su Google
+                        url = new Uri(googleSearchUrl, "search?q=" + Uri.EscapeDataString(input));
+                    }
+                    else
+                    {
+                        // Aggiungi "https://" se necessario
+                        if (!input.StartsWith("http://") && !input.StartsWith("https://"))
+                        {
+                            // Controlla se l'input inizia con "www." e aggiungi "https://" se necessario
+                            if (!input.StartsWith("www."))
+                            {
+                                input = "www." + input;
+                            }
+
+                            url = new Uri("https://" + input);
+                        }
+                        else
+                        {
+                            url = new Uri(input);
+                        }
+                    }
+
+                    previousUrl = currentUrl; // Salva l'URL corrente come URL precedente
+                    currentUrl = url; // Aggiorna l'URL corrente
+                    await LoadWebPageAsync(currentWebBrowser, url);
                 }
             }
         }
 
+
         private TaskCompletionSource<bool> pageLoadTcs;
 
-        private async Task LoadWebPageAsync(string url)
+        private async Task LoadWebPageAsync(WebBrowser webBrowser, Uri uri)
         {
-            pageLoadTcs = new TaskCompletionSource<bool>();
+            webBrowser.Navigating += (s, e) =>
+            {
+                dynamic activeX = webBrowser.GetType().GetField("_axIWebBrowser2", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(webBrowser);
+                activeX.Silent = true;
+            };
 
-            webBrowser.LoadCompleted += WebBrowser_LoadCompleted;
-            webBrowser.Navigate(new Uri(url));
-
-            // Attendere che la pagina sia completamente caricata
-            await pageLoadTcs.Task;
-
-            webBrowser.LoadCompleted -= WebBrowser_LoadCompleted;
+            await Task.Run(() =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    webBrowser.Navigate(uri);
+                });
+            });
         }
 
         private void WebBrowser_LoadCompleted(object sender, NavigationEventArgs e)
@@ -63,8 +104,6 @@ namespace Browser
             // Segnalare che il caricamento della pagina è completo
             pageLoadTcs.SetResult(true);
         }
-
-        private int tabCounter = 1;
 
         private void NewTabButton_Click(object sender, RoutedEventArgs e)
         {
@@ -75,6 +114,7 @@ namespace Browser
             tabControl.SelectedItem = newTab;
             tabCounter++;
         }
+
         private void AddTabButton_Click(object sender, RoutedEventArgs e)
         {
             AddNewTabToGoogle();
@@ -82,28 +122,24 @@ namespace Browser
 
         private void CloseTabButton_Click(object sender, RoutedEventArgs e)
         {
-            // Ottieni il pulsante "X" che è stato premuto
             Button closeButton = (Button)sender;
-
-            // Ottieni il TabItem padre del pulsante
             TabItem tabItem = FindParentTabItem(closeButton);
 
             if (tabItem != null)
             {
-                // Rimuovi la scheda dal TabControl
                 tabControl.Items.Remove(tabItem);
 
                 if (tabControl.Items.Count == 0)
                 {
-                    // Se stai chiudendo l'ultimo tab, crea un nuovo tab che riporta a Google
                     AddNewTabToGoogle();
                 }
             }
         }
 
+        private int tabCounter = 1;
+
         private void AddNewTabToGoogle()
         {
-            // Crea un nuovo TabItem
             TabItem newTab = new TabItem();
             newTab.Header = "New Tab"; // Imposta l'intestazione iniziale
             WebBrowser newWebBrowser = new WebBrowser();
@@ -113,14 +149,9 @@ namespace Browser
             newWebBrowser.Navigate("https://www.google.com");
 
             newTab.Content = newWebBrowser;
-
-            // Aggiungi il nuovo TabItem alla fine del TabControl
             tabControl.Items.Add(newTab);
-
-            // Passa alla nuova scheda
             tabControl.SelectedItem = newTab;
         }
-
 
         private TabItem FindParentTabItem(DependencyObject child)
         {
@@ -134,19 +165,47 @@ namespace Browser
             return parent as TabItem;
         }
 
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentWebBrowser != null)
+            {
+                // Esegui l'aggiornamento della pagina web
+                currentWebBrowser.Refresh();
+                isRefreshing = true;
+            }
+        }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             TabItem selectedTab = tabControl.SelectedItem as TabItem;
+            WebBrowser webBrowser = selectedTab?.Content as WebBrowser;
 
-            if (selectedTab != null)
+            if (webBrowser != null)
             {
-                WebBrowser webBrowser = selectedTab.Content as WebBrowser;
-                if (webBrowser != null)
+                if (previousUrl != null)
                 {
-                    // Interrompi il caricamento della pagina web impostando la Source su null
-                    webBrowser.Source = null;
+                    webBrowser.Navigate(previousUrl); // Torna all'URL precedente
                 }
+                else
+                {
+                    // Se non c'è un URL precedente, carica una pagina vuota
+                    webBrowser.Navigate("about:blank");
+                }
+            }
+        }
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentWebBrowser.CanGoBack)
+            {
+                currentWebBrowser.GoBack();
+            }
+        }
+
+        private void ForwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentWebBrowser.CanGoForward)
+            {
+                currentWebBrowser.GoForward();
             }
         }
 
@@ -156,7 +215,7 @@ namespace Browser
             WebBrowser newWebBrowser = new WebBrowser();
             newWebBrowser.Name = "webBrowser" + tabCounter;
             newWebBrowser.Navigate("about:blank");
-            return newWebBrowser;
+            return newWebBrowser;   
         }
     }
 }
