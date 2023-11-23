@@ -4,11 +4,7 @@
              xmlns:local="clr-namespace:Browser"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <SolidColorBrush x:Key="wBackGround" Color="#222831"/>
-        <SolidColorBrush x:Key="wSecondaryBack" Color="#393E46"/>
-        <SolidColorBrush x:Key="wAzzurro" Color="#00ADB5" />
-        <SolidColorBrush x:Key="wWhite" Color="#EEEEEE"/>
-
+        
         <Style x:Key="wbMenu" TargetType="MenuItem">
             <Setter Property="Height" Value="25"/>
             <Setter Property="Padding" Value="10,0"/>

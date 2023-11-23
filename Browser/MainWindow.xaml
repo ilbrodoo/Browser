@@ -53,7 +53,7 @@
                 </Button.Content>
             </Button>
 
-            <TextBox x:Name="urlTextBox" Style="{StaticResource AddressBarStyle}" Width="675" />
+            <TextBox x:Name="urlTextBox" Style="{StaticResource AddressBarStyle}" Width="605" />
             <Button Content="Go" Style="{StaticResource RoundedButtonStyle}" Width="27" Height="25" Click="NavigateButton_Click"/>
         </StackPanel>
 
@@ -64,7 +64,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TabControl x:Name="tabControl" Grid.Column="0">
+            <TabControl x:Name="tabControl" SelectionChanged="TabControl_SelectionChanged" Grid.Column="0">
                 <TabControl.ItemContainerStyle>
                     <Style TargetType="TabItem">
                         <Setter Property="HeaderTemplate">
@@ -81,9 +81,7 @@
                         </Setter>
                     </Style>
                 </TabControl.ItemContainerStyle>
-                <TabItem Header="New Tab">
-                    <WebBrowser x:Name="webBrowser" Margin="0,0,-1,0" />
-                </TabItem>
+                
             </TabControl>
 
             <Button Content="+" Style="{StaticResource RoundedButtonStyle}" Height="18" Click="AddTabButton_Click" VerticalAlignment="Top" Grid.Column="1" Margin="0,5,5,0" HorizontalAlignment="Right" Width="30" />
